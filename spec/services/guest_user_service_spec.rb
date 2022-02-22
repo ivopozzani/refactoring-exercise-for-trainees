@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe GuestUserService, type: :controller do
   describe '#call' do
-    subject(:service) { GuestUserService.call(params, cart) }
+    subject(:service) { GuestUserService.call(cart, params) }
     let(:params) do { email: 'user@spec.io', first_name: "John", last_name: "Doe" } end
 
     context 'when user is created' do

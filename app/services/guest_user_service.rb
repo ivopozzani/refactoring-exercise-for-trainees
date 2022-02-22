@@ -1,11 +1,7 @@
-class GuestUserService
-  def self.call(params, cart)
-    new(params, cart).call
-  end
-
-  def initialize(params, cart)
-    @params = params
+class GuestUserService < ApplicationService
+  def initialize(cart, params)
     @cart = cart
+    @params = params
   end
 
   private_class_method :new

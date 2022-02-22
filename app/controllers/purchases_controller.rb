@@ -2,26 +2,23 @@ class PurchasesController < ApplicationController
   include SupportedPaymentType
 
   def create    
-    if payment_type_supported?(purchase_params[:gateway])
-      cart = Cart.find_by(purchase_params[:cart_id])
+    return render_message_error('Gateway not supported!') unless payment_type_supported?(purchase_params[:gateway])
+    
+    cart = Cart.find_by(purchase_params[:cart_id])
+    return render_message_error('Cart not found!') unless cart
+    
+    user = GuestUserService.call(cart, purchase_params[:user])
 
-      return render_message_error('Cart not found!') unless cart
+    if user.valid?
+      order = ProcessOrderService.call(cart, user, purchase_params[:address])
       
-      user = GuestUserService.call(purchase_params[:user], cart)
-     
-      if user.valid?
-        order = ProcessOrderService.call(cart, user, purchase_params[:address])
-        
-        if order.valid?
-          render_order_success(order.id)
-        else
-          render_object_error(order)
-        end
+      if order.valid?
+        render_order_success(order.id)
       else
-        render_object_error(user)
+        render_object_error(order)
       end
     else
-      render_message_error('Gateway not supported!')
+      render_object_error(user)
     end
   end
 

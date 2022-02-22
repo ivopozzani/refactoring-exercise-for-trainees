@@ -1,8 +1,4 @@
-class ProcessOrderService
-  def self.call(cart, user, params)
-    new(cart, user, params).call
-  end
-
+class ProcessOrderService < ApplicationService
   def initialize(cart, user, params)
     @cart = cart
     @user = user
