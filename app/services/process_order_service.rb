@@ -19,7 +19,7 @@ class ProcessOrderService
   end
 
   private 
-  
+
   def new_order
     Order.new(
         user: @user,
