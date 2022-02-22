@@ -1,25 +1,19 @@
 class PurchasesController < ApplicationController
   include SupportedPaymentType
 
-  def create
-    
+  def create    
     if payment_type_supported?(purchase_params[:gateway])
       cart_id = purchase_params[:cart_id]
+      
+      cart = Cart.find_by(id: cart_id)
 
-        cart = Cart.find_by(id: cart_id)
+      unless cart
+        return render json: { errors: [{ message: 'Cart not found!' }] }, status: :unprocessable_entity
+      end
 
-        unless cart
-          return render json: { errors: [{ message: 'Cart not found!' }] }, status: :unprocessable_entity
-        end
+      user = GuestUserService.call(purchase_params[:user], cart)
 
-        user = if cart.user.nil?
-                 user_params = purchase_params[:user] ? purchase_params[:user] : {}
-                 User.create(**user_params.merge(guest: true))
-               else
-                 cart.user
-               end
-
-        if user.valid?
+      if user.valid?
           order = Order.new(
             user: user,
             first_name: user.first_name,

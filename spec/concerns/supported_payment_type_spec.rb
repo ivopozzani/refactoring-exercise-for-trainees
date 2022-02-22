@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'Supported Payment Type', type: :controller do
+RSpec.describe SupportedPaymentType, type: :controller do
   include SupportedPaymentType
 
   describe '#payment_type_supported?' do
