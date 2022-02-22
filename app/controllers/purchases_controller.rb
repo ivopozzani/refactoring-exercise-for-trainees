@@ -3,29 +3,25 @@ class PurchasesController < ApplicationController
 
   def create    
     if payment_type_supported?(purchase_params[:gateway])
-      cart_id = purchase_params[:cart_id]
+      cart = Cart.find_by(purchase_params[:cart_id])
+
+      return render_message_error('Cart not found!') unless cart
       
-      cart = Cart.find_by(id: cart_id)
-
-      unless cart
-        return render json: { errors: [{ message: 'Cart not found!' }] }, status: :unprocessable_entity
-      end
-
       user = GuestUserService.call(purchase_params[:user], cart)
      
       if user.valid?
         order = ProcessOrderService.call(cart, user, purchase_params[:address])
         
         if order.valid?
-          return render json: { status: :success, order: { id: order.id } }, status: :ok
+          render_order_success(order.id)
         else
-          return render json: { errors: order.errors.map(&:full_message).map { |message| { message: message } } }, status: :unprocessable_entity
+          render_object_error(order)
         end
       else
-        return render json: { errors: user.errors.map(&:full_message).map { |message| { message: message } } }, status: :unprocessable_entity
+        render_object_error(user)
       end
     else
-      render json: { errors: [{ message: 'Gateway not supported!' }] }, status: :unprocessable_entity
+      render_message_error('Gateway not supported!')
     end
   end
 
@@ -38,5 +34,17 @@ class PurchasesController < ApplicationController
       user: %i[email first_name last_name],
       address: %i[address_1 address_2 city state country zip]
     )
+  end
+
+  def render_message_error(e)
+    render json: { errors: [{ message: e }] }, status: :unprocessable_entity
+  end
+
+  def render_object_error(obj)
+    render json: { errors: obj.errors.map(&:full_message).map { |message| { message: message } } }, status: :unprocessable_entity
+  end
+
+  def render_order_success(order)
+    render json: { status: :success, order: { id: order } }, status: :ok
   end
 end
