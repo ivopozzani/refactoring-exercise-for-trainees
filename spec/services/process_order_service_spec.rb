@@ -2,9 +2,9 @@ require 'rails_helper'
 
 RSpec.describe ProcessOrderService, type: :controller do
   describe '#call' do
-    let(:cart) { create(:cart) }
-    let(:user) { cart.user }
-    let(:params) { nil }
+    let (:cart) { create(:cart) }
+    let (:user) { cart.user }
+    let (:params) { nil }
 
     it 'creates new order' do
       expect { ProcessOrderService.call(cart, user, params) }.to change(Order, :count).by(1)

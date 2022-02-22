@@ -9,10 +9,10 @@ class GuestUserService
   end
 
   private_class_method :new
-
+  
   def call
     if @cart.user.nil?
-      user_params = @params || {}
+      user_params = @params ? @params : {}
       User.create(**user_params.merge(guest: true))
     else
       @cart.user

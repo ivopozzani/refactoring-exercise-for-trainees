@@ -1,17 +1,17 @@
 class PurchasesController < ApplicationController
   include SupportedPaymentType
 
-  def create
+  def create    
     if payment_type_supported?(purchase_params[:gateway])
       cart = Cart.find_by(purchase_params[:cart_id])
 
       return render_message_error('Cart not found!') unless cart
-
+      
       user = GuestUserService.call(purchase_params[:user], cart)
-
+     
       if user.valid?
         order = ProcessOrderService.call(cart, user, purchase_params[:address])
-
+        
         if order.valid?
           render_order_success(order.id)
         else
@@ -41,9 +41,7 @@ class PurchasesController < ApplicationController
   end
 
   def render_object_error(obj)
-    render json: { errors: obj.errors.map(&:full_message).map do |message| 
-      { message: message } end }, 
-      status: :unprocessable_entity
+    render json: { errors: obj.errors.map(&:full_message).map { |message| { message: message } } }, status: :unprocessable_entity
   end
 
   def render_order_success(order)
