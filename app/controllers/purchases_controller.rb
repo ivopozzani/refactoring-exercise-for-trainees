@@ -7,7 +7,7 @@ class PurchasesController < ApplicationController
     cart = Cart.find_by(purchase_params[:cart_id])
     return render_message_error('Cart not found!') unless cart
     
-    user = GuestUserService.call(cart, purchase_params[:user])
+    user = GetUserService.call(cart, purchase_params[:user])
 
     if user.valid?
       order = ProcessOrderService.call(cart, user, purchase_params[:address])
