@@ -6,7 +6,6 @@ class GetUserService < ApplicationService
 
   def call
     if @cart.user.nil?
-      #user_params = @params ? @params : {}
       User.create(@params.merge(guest: true))
     else
       @cart.user
