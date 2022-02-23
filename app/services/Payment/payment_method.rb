@@ -1,7 +1,7 @@
 module Payment
   class PaymentMethod
     def method_implemented?
-      true
+      false
     end  
   end
 end
