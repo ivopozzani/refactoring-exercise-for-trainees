@@ -1,5 +1,5 @@
 module Payment
-  class PaymentPaypal < PaymentMethod
+  class PaymentPaypal
     def method_implemented?
       true
     end 

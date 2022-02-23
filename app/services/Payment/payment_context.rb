@@ -6,14 +6,11 @@ module Payment
       @payment_method = payment_method
     end
 
-    def set_payment_method(payment_method)
-      @payment_method = payment_method
-    end
-
     def method_accepted?
-      if @payment_method == 'paypal'
+      case @payment_method
+      when 'paypal'
         Payment::PaymentPaypal.new.method_implemented?
-      elsif @payment_method == 'stripe'
+      when 'stripe'
         Payment::PaymentStripe.new.method_implemented?
       else
         false
