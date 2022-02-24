@@ -1,7 +1,5 @@
 module Purchase
   class ProcessPurchaseService < Purchase::ApplicationService
-    PAYMENT_METHOD = %w[paypal stripe]
-
     def initialize(gateway, cart_id, user_params, address)
       @gateway = gateway
       @cart_id = cart_id
