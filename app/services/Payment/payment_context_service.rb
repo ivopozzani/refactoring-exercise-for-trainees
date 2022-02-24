@@ -1,5 +1,5 @@
 module Payment
-  class PaymentContext
+  class PaymentContextService
     attr_writer :payment_method
   
     def initialize(payment_method)
@@ -9,9 +9,9 @@ module Payment
     def method_accepted?
       case @payment_method
       when 'paypal'
-        Payment::PaymentPaypal.new.method_implemented?
+        Payment::PaymentPaypalService.new.method_implemented?
       when 'stripe'
-        Payment::PaymentStripe.new.method_implemented?
+        Payment::PaymentStripeService.new.method_implemented?
       else
         false
       end

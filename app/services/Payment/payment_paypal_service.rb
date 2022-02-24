@@ -1,5 +1,5 @@
 module Payment
-  class PaymentStripe
+  class PaymentPaypalService
     def method_implemented?
       true
     end 

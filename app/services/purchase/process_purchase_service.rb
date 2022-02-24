@@ -10,7 +10,7 @@ module Purchase
     end
 
     def call
-      unless PAYMENT_METHOD.include?(@gateway)
+      unless Payment::PaymentContextService.new(@gateway).method_accepted?
         return Purchase::PurchaseResultService.new(
           { errors: [{ message: 'Gateway not supported!' }] }, :unprocessable_entity
         )
