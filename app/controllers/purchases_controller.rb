@@ -1,24 +1,12 @@
 class PurchasesController < ApplicationController
-  include SupportedPaymentType
+  def create
+    purchase = Purchase::ProcessPurchaseService.call(purchase_params[:gateway], purchase_params[:cart_id],
+                                                    purchase_params[:user], purchase_params[:address])
 
-  def create    
-    return render_message_error('Gateway not supported!') unless payment_type_supported?(purchase_params[:gateway])
-    
-    cart = Cart.find_by(purchase_params[:cart_id])
-    return render_message_error('Cart not found!') unless cart
-    
-    user = GetUserService.call(cart, purchase_params[:user])
-
-    if user.valid?
-      order = ProcessOrderService.call(cart, user, purchase_params[:address])
-      
-      if order.valid?
-        render_order_success(order.id)
-      else
-        render_object_error(order)
-      end
+    if purchase.successful?
+      render_message(purchase.render_json, purchase.status)
     else
-      render_object_error(user)
+      render_message(purchase.render_json, purchase.status)
     end
   end
 
@@ -33,15 +21,7 @@ class PurchasesController < ApplicationController
     )
   end
 
-  def render_message_error(e)
-    render json: { errors: [{ message: e }] }, status: :unprocessable_entity
-  end
-
-  def render_object_error(obj)
-    render json: { errors: obj.errors.map(&:full_message).map { |message| { message: message } } }, status: :unprocessable_entity
-  end
-
-  def render_order_success(order)
-    render json: { status: :success, order: { id: order } }, status: :ok
+  def render_message(json, status)
+    render json: json, status: status
   end
 end
