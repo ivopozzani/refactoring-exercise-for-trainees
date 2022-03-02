@@ -24,20 +24,7 @@ module Purchase
       user = GetUserService.call(cart, @user_params)
 
       if user.valid?
-        order = ProcessOrderService.call(cart, user, @address)
-
-        if order.valid?
-          Purchase::PurchaseResultService.new(
-            success: true, object: order
-          )
-        else
-          Purchase::PurchaseResultService.new(
-            errors: order.errors.map(&:full_message).map do |message|
-                      { message: message }
-                    end,
-            success: false
-          )
-        end
+        ProcessOrderService.call(cart, user, @address)
       else
         Purchase::PurchaseResultService.new(
           errors: user.errors.map(&:full_message).map do |message|
