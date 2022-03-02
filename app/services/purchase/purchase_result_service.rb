@@ -1,14 +1,15 @@
 module Purchase
   class PurchaseResultService
-    attr_reader :render_json, :status
+    attr_reader :errors, :success, :object
 
-    def initialize(render_json, status)
-      @render_json = render_json
-      @status = status
+    def initialize(purchase)
+      @errors = purchase[:errors]
+      @success = purchase[:success]
+      @object = purchase[:object]
     end
 
     def successful?
-      status == :ok
+      success
     end
   end
 end

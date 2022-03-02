@@ -1,57 +1,88 @@
 require 'rails_helper'
 
 RSpec.describe Purchase::ProcessPurchaseService do
-  describe '#call' do
-    subject { Purchase::ProcessPurchaseService.call(gateway, cart_id, user, address) }
-
-    let(:gateway) { 'paypal' }
+  describe '.call' do
+    subject { Purchase::ProcessPurchaseService.call(params) }
     let(:cart) { create(:cart) }
-    let(:cart_id) { '1' }
-    let(:user) { cart.user }
-    let(:address) do
-      { address_1: 'add1', address_2: 'add2', city: 'city1', state: 'state1', country: 'country1', zip: '44444' }
+    let(:params) do
+      { 
+        gateway: gateway,
+        cart_id: cart_id,
+        user: user,
+        address: {
+          address_1: 'add1',
+          address_2: 'add2',
+          city: 'city1',
+          state: 'state1',
+          country: 'country1',
+          zip: '44444'
+        }
+      }
     end
+
     context 'when successful' do
-      it 'returns json with status "success" and order "id"' do
-        expect(subject.render_json).to eq({ status: :success, order: { id: 1 } })
+      let(:gateway) { 'paypal' }
+      let(:cart_id) { '1' }
+      let(:user) { cart.user }
+
+      describe '#errors' do
+        it 'returns no errors' do
+          expect(subject.errors).to eq(nil)
+        end
       end
 
-      it 'returns status ok' do
-        expect(subject.status).to eq(:ok)
+      describe '#success' do
+        it 'returns "true"' do
+          expect(subject.success).to eq(true)
+        end
       end
 
-      it 'returns true' do
-        expect(subject.successful?).to be true
+      describe '#object' do
+        it 'returns Order Object' do
+          expect(subject.object).to eq(Order.last)
+        end
+      end
+
+      describe '#successful?' do
+        it 'returns true' do
+          expect(subject.successful?).to be true
+        end
       end
     end
 
     context 'when not successful' do
+      let(:gateway) { 'paypal' }
+      let(:cart_id) { '1' }
+      let(:user) { cart.user }
+
       describe 'for Gateway not supported' do
         let(:gateway) { 'invalid' }
-        it 'returns json with erros message' do
-          expect(subject.render_json).to eq({ errors: [{ message: 'Gateway not supported!' }] })
+
+        it 'returns message "Gateway not supported!"' do
+          expect(subject.errors).to eq([{ message: 'Gateway not supported!' }])
         end
 
-        it 'returns status unprocessable_entity' do
-          expect(subject.status).to eq(:unprocessable_entity)
+        it 'returns success "false"' do
+          expect(subject.success).to be false
         end
 
-        it 'returns false' do
+        it 'returns successful? "false"' do
           expect(subject.successful?).to be false
         end
       end
 
       describe 'for Cart not found' do
         let(:user) { nil }
-        it 'returns json with erros message' do
-          expect(subject.render_json).to eq({:errors=>[{:message=>"Cart not found!"}]})
+
+        it 'returns message "Cart not found!"' do
+          expect(subject.errors).to eq([{ message: 'Cart not found!' }])
         end
 
-        it 'returns status unprocessable_entity' do
-          expect(subject.status).to eq(:unprocessable_entity)
+        it 'returns success "false"' do
+          expect(subject.success).to be false
         end
 
-        it 'returns false' do
+        it 'returns successful? "false"' do
           expect(subject.successful?).to be false
         end
       end

@@ -1,12 +1,11 @@
 class PurchasesController < ApplicationController
   def create
-    purchase = Purchase::ProcessPurchaseService.call(purchase_params[:gateway], purchase_params[:cart_id],
-                                                    purchase_params[:user], purchase_params[:address])
+    purchase = Purchase::ProcessPurchaseService.call(purchase_params)
 
     if purchase.successful?
-      render_message(purchase.render_json, purchase.status)
+      render json: { status: :success, order: { id: purchase.object.id } }, status: :ok
     else
-      render_message(purchase.render_json, purchase.status)
+      render json: { errors: purchase.errors }, status: :unprocessable_entity
     end
   end
 
@@ -19,9 +18,5 @@ class PurchasesController < ApplicationController
       user: %i[email first_name last_name],
       address: %i[address_1 address_2 city state country zip]
     )
-  end
-
-  def render_message(json, status)
-    render json: json, status: status
   end
 end

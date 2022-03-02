@@ -1,23 +1,23 @@
 module Purchase
   class ProcessPurchaseService < Purchase::ApplicationService
-    def initialize(gateway, cart_id, user_params, address)
-      @gateway = gateway
-      @cart_id = cart_id
-      @user_params = user_params
-      @address = address
+    def initialize(params)
+      @gateway = params.fetch(:gateway, nil)
+      @cart_id = params.fetch(:cart_id, nil)
+      @user_params = params.fetch(:user, nil)
+      @address = params.fetch(:address, nil)
     end
 
     def call
       unless Payment::PaymentContextService.new(@gateway).method_accepted?
         return Purchase::PurchaseResultService.new(
-          { errors: [{ message: 'Gateway not supported!' }] }, :unprocessable_entity
+          errors: [{ message: 'Gateway not supported!' }], success: false
         )
       end
 
       cart = Cart.find_by(@cart_id)
       unless cart
         return Purchase::PurchaseResultService.new(
-          { errors: [{ message: 'Cart not found!' }] }, :unprocessable_entity
+          errors: [{ message: 'Cart not found!' }], success: false
         )
       end
 
@@ -28,22 +28,22 @@ module Purchase
 
         if order.valid?
           Purchase::PurchaseResultService.new(
-            { status: :success, order: { id: order.id } }, :ok
+            success: true, object: order
           )
         else
           Purchase::PurchaseResultService.new(
-            { errors: order.errors.map(&:full_message).map do |message|
-                        { message: message }
-                      end },
-            :unprocessable_entity
+            errors: order.errors.map(&:full_message).map do |message|
+                      { message: message }
+                    end,
+            success: false
           )
         end
       else
         Purchase::PurchaseResultService.new(
-          { errors: user.errors.map(&:full_message).map do |message|
-                      { message: message }
-                    end },
-          :unprocessable_entity
+          errors: user.errors.map(&:full_message).map do |message|
+                    { message: message }
+                  end,
+          success: false
         )
       end
     end
