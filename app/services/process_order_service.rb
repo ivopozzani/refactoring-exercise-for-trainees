@@ -15,12 +15,8 @@ class ProcessOrderService < ApplicationService
     if order.valid?
       Purchase::PurchaseResultService.new(success: true, object: order)
     else
-      Purchase::PurchaseResultService.new(
-        errors: order.errors.map(&:full_message).map do |message|
-                  { message: message }
-                end,
-        success: false
-      )
+      Purchase::PurchaseResultService.new(errors: order.errors.map(&:full_message),
+                                          success: false)
     end
   end
 

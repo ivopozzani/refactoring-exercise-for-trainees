@@ -5,7 +5,10 @@ class PurchasesController < ApplicationController
     if purchase.successful?
       render json: { status: :success, order: { id: purchase.object.id } }, status: :ok
     else
-      render json: { errors: purchase.errors }, status: :unprocessable_entity
+      render json: { errors: purchase.errors.map do |message|
+                               { message: message }
+                             end },
+             status: :unprocessable_entity
     end
   end
 

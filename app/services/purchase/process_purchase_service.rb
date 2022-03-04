@@ -8,17 +8,15 @@ module Purchase
     end
 
     def call
-      unless Payment::PaymentContextService.new(@gateway).method_accepted?
-        return Purchase::PurchaseResultService.new(
-          errors: [{ message: 'Gateway not supported!' }], success: false
-        )
+      unless valid_gateway?
+        return Purchase::PurchaseResultService.new(errors: ['Gateway not supported!'],
+                                                   success: false)
       end
 
       cart = Cart.find_by(@cart_id)
       unless cart
-        return Purchase::PurchaseResultService.new(
-          errors: [{ message: 'Cart not found!' }], success: false
-        )
+        return Purchase::PurchaseResultService.new(errors: ['Cart not found!'],
+                                                   success: false)
       end
 
       user = GetUserService.call(cart, @user_params)
@@ -26,13 +24,15 @@ module Purchase
       if user.valid?
         ProcessOrderService.call(cart, user, @address)
       else
-        Purchase::PurchaseResultService.new(
-          errors: user.errors.map(&:full_message).map do |message|
-                    { message: message }
-                  end,
-          success: false
-        )
+        Purchase::PurchaseResultService.new(errors: user.errors.map(&:full_message),
+                                            success: false)
       end
+    end
+
+    private
+
+    def valid_gateway?
+      Payment::PaymentContextService.new(@gateway).allowed?
     end
   end
 end

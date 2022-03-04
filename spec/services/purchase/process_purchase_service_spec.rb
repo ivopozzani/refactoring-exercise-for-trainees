@@ -5,7 +5,7 @@ RSpec.describe Purchase::ProcessPurchaseService do
     subject { Purchase::ProcessPurchaseService.call(params) }
     let(:cart) { create(:cart) }
     let(:params) do
-      { 
+      {
         gateway: gateway,
         cart_id: cart_id,
         user: user,
@@ -59,7 +59,7 @@ RSpec.describe Purchase::ProcessPurchaseService do
         let(:gateway) { 'invalid' }
 
         it 'returns message "Gateway not supported!"' do
-          expect(subject.errors).to eq([{ message: 'Gateway not supported!' }])
+          expect(subject.errors).to eq(['Gateway not supported!'])
         end
 
         it 'returns success "false"' do
@@ -75,7 +75,7 @@ RSpec.describe Purchase::ProcessPurchaseService do
         let(:user) { nil }
 
         it 'returns message "Cart not found!"' do
-          expect(subject.errors).to eq([{ message: 'Cart not found!' }])
+          expect(subject.errors).to eq(['Cart not found!'])
         end
 
         it 'returns success "false"' do
